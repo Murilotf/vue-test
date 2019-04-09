@@ -3,24 +3,66 @@ new Vue({
     data: {
         playerHealth: 100,
         monsterHealth: 100,
-        gameIsRunning: false
+        gameIsRunning: false,
+        turns:[]
     },
     methods: { 
     startGame: function(){
         this.gameIsRunning = true;
         this.playerHealth = 100;
         this.monsterHealth = 100;
+        this.turns = [];
     },
     attack: function(){
-        this.monsterHealth -= this.calculateDamage(10 , 3);        
+        var damage = this.calculateDamage(10 , 3);
+        this.monsterHealth -= damage;
+        this.turns.unshift({
+            isPlayer : true,
+            text : 'Player damaged Monster for : '+damage
+        });
         if(this.checkWin()){
-           return;
+            return;
         }
-        this.playerHealth -= this.calculateDamage(12 , 5);
-        this.checkWin();
+        this.monsterAttack();
+    },
+    specialAttack: function () {
+        var damage = this.calculateDamage(20 , 10);
+        this.monsterHealth -= damage;
+        this.turns.unshift({
+            isPlayer : true,
+            text : 'Player damaged Monster hard for : '+damage
+        });
+        if(this.checkWin()){
+            return;
+        }
+        this.monsterAttack();
+    },
+    heal: function () {
+      if(this.playerHealth <= 90){
+          this.playerHealth += 10;
+      }else{
+          this.playerHealth = 100;
+      }
+        this.turns.unshift({
+            isPlayer : true,
+            text : 'Player heal for : 10'
+        });
+      this.monsterAttack();
+    },
+    giveUp: function () {
+        this.gameIsRunning = false;
     },
     calculateDamage: function(maxDamage,minDamage){
         return Math.max(Math.floor(Math.random()*maxDamage)+1,minDamage);
+    },
+    monsterAttack: function () {
+        var damage = this.calculateDamage(12 , 5);
+        this.playerHealth -= damage;
+        this.checkWin();
+        this.turns.unshift({
+            isPlayer : false,
+            text : 'Monster damaged Player for : '+damage
+        });
     },
     checkWin: function(){
         if(this.monsterHealth <= 0 ){
